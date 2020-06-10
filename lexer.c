@@ -3,25 +3,10 @@
 #include <string.h>
 #include "lexer.h"
 
-/*
- * Exmaples of (TOKEN, ATTRIBUTE) pairs: (IF, if), (IDENTIFIER, _this47),
- * (COMPARISON, >), (ASSIGNMENT, +=), (MATH, *), etc. I may come up with
- * different token names and different classes of tokens as time goes on
- * if I find something that works better. Also when parsing begins this
- * will definitely almost certainly have at least a few more fields.
- */
-
-/*typedef struct token
-{
-    char *token;     //the token, example: IF, IDENTIFIER, RELOP
-    char *attribute; //attribute value, example: KEYWORD, _id43, >
-} token;
-*/
 //useful sets of characters
 const char *letters    = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const char *numbers    = "0123456789";
 const char *whitespace = " \t\n";
-const char *delimeters = "(){}[]";
 
 //returns 1 if c is a member of set, else return 0
 int in(char c, const char *set)
@@ -263,7 +248,7 @@ token *accept_operator(char **lexeme_begin)
     len = (size_t)(forward - *lexeme_begin);
     op_token = (token *) malloc(sizeof(token));
     if(len == 1)
-        op_token->token = strdup("MATH");
+        op_token->token = strndup(*lexeme_begin, len);
     else
         op_token->token = strdup("ASSIGNMENT_OP");
     
