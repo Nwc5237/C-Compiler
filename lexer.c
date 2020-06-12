@@ -86,7 +86,7 @@ token *accept_identifier(char **lexeme_begin)
         }
 
         id_token = (token *) malloc(sizeof(token));
-        id_token->token = strdup("IDENTIFIER");
+        id_token->token = strdup("ID");
         id_token->attribute = strndup(*lexeme_begin, (size_t)(forward - *lexeme_begin));
         *lexeme_begin = forward;
         

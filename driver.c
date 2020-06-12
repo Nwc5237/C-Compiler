@@ -7,11 +7,6 @@ int main(int argc, char *argv[])
 {
     printf("Beginning parse...\n");
     char *input = argv[1], *pos = input;
-
-    if(parse(&pos))
-        printf("Parse terminated successfully.\n");
-    else
-        printf("Parse terminated with an error.\n");
-    
+    parse(&pos);
     exit(0);
 }

@@ -9,9 +9,21 @@ If you have any questions or suggestions feel free to let me know and thanks for
 checking it out!
 
 TODO:
+-the expression (4-3+6) gives the value -5. It seems to parse it as
+4-(3+6) which makes sense. We need to get left to right order figured out.
+
+-Also i messed up one of the multiplication things. It's trying to parse
+for mult ops where none would be or something like that. Probably need
+to go in and switch some !strcmp(att->add_op, "+ or -") statements to
+a !strcmp(att->mult_op, "* or /").
+
 -Shift operators <<, >>, and the other assignment operators
 like <<=, >>=, ^=, |= , &= (and others I can't think of right
 now if I'm forgetting them)
+
+-free pointers we're done with, especiall check parser.c because
+you never use the pointers you don't return after the function call
+has ended.
 
 -Add in the e notation for floats
 

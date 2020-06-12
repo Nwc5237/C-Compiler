@@ -1,4 +1,4 @@
-/*#ifndef TOKEN_H_
+#ifndef TOKEN_H_
 #define TOKEN_H_
 typedef struct token
 {
@@ -6,11 +6,6 @@ typedef struct token
     char *attribute;
 } token;
 #endif // TOKEN_H_
-
-extern const char *letters;
-extern const char *numbers;
-extern const char *whitespace;
-extern const char *delimeters;
 
 #ifndef IN_H_
 #define IN_H_
@@ -50,28 +45,4 @@ token *accept_logical(char **lexeme_begin);
 #ifndef SCAN_H_
 #define SCAN_H_
 token *scan(char **pos);
-#endif // SCAN_H_*/
-
-//XXX
-#ifndef TOKEN_H_
-#define TOKEN_H_
-typedef struct token
-{
-    char *token;
-    char *attribute;
-} token;
-#endif // TOKEN_H_
-
-//extern const char *letters;
-//extern const char *numbers;
-//extern const char *whitespace;
-//extern const char *delimeters;
-
-int in(char c, const char *set);
-token *accept_keyword(char **lexeme_begin);
-token *accept_identifier(char **lexeme_begin);
-token *accept_number(char **lexeme_begin);
-token *accept_relop(char **lexeme_begin);
-token *accept_operator(char **lexeme_begin);
-token *accept_logical(char **lexeme_begin);
-token *scan(char **pos);
+#endif // SCAN_H_
