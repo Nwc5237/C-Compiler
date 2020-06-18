@@ -5,8 +5,19 @@
 
 int main(int argc, char *argv[])
 {
-    printf("Beginning parse...\n");
     char *input = argv[1], *pos = input;
+    char *i = argv[1];
+    
+    printf("Beginning parse...\n");
     parse(&pos);
+    printf("Parsed:\n");
+
+    while(i < pos)
+    {
+        printf("%c", *i);
+        i++;
+    }
+    printf("\nDone.\n");
+    
     exit(0);
 }

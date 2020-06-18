@@ -9,13 +9,8 @@ If you have any questions or suggestions feel free to let me know and thanks for
 checking it out!
 
 TODO:
--the expression (4-3+6) gives the value -5. It seems to parse it as
-4-(3+6) which makes sense. We need to get left to right order figured out.
-
--Also i messed up one of the multiplication things. It's trying to parse
-for mult ops where none would be or something like that. Probably need
-to go in and switch some !strcmp(att->add_op, "+ or -") statements to
-a !strcmp(att->mult_op, "* or /").
+-Add in support for unary expresions such as "-5". Use
+the parse_unary and start using the parse_binary function.
 
 -Shift operators <<, >>, and the other assignment operators
 like <<=, >>=, ^=, |= , &= (and others I can't think of right
