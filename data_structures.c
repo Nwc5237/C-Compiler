@@ -59,3 +59,37 @@ stack *init_stack()
     stack *s = malloc(sizeof(stack));
     return s;
 }
+
+//utility function for converting ints to ascii strings
+char *itoa(int a)
+{
+    if(a < 0)
+    {
+        printf("Error: converting negative constant.\n");
+        exit(0);
+    }
+
+    int log10=0, copy=a;
+    char *str;
+
+    if(!a)
+        return strdup("0");
+
+    while(copy > 0)
+    {
+        copy /= 10;
+        log10++;
+    }
+
+    str = malloc(sizeof(char) * log10);
+    str[log10] = '\0';
+    log10--;
+
+    while(log10 >= 0)
+    {
+        str[log10] = (char) (a%10+48);
+        a /= 10;
+        log10--;
+    }
+    return str;
+}

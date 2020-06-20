@@ -45,3 +45,8 @@ element *init_element(char *data);
 #define INIT_STACK_H_
 stack *init_stack();
 #endif // INIT_STACK_H_
+
+#ifndef INIT_ITOA_H_
+#define INIT_ITOA_H_
+char *itoa(int a);
+#endif // INIT_ITOA_H_

@@ -9,6 +9,8 @@ If you have any questions or suggestions feel free to let me know and thanks for
 checking it out!
 
 TODO:
+-When operators stack is empty perform last op
+
 -Add in support for unary expresions such as "-5". Use
 the parse_unary and start using the parse_binary function.
 

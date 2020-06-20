@@ -9,6 +9,7 @@ int parse(char **pos)
 {
     stack *operators=malloc(sizeof(stack)), *operands=malloc(sizeof(stack));
     parse_expression(pos, operators, operands);
+    printf("result: %s\n", pop(operands)->data);
     return 1;
 }
 
@@ -27,15 +28,6 @@ int parse_expression(char **pos, stack *operators, stack *operands)
     while(1)
     {
         *copy = *lookahead;
-        /*tok = scan(lookahead);
-
-        if(!tok)
-        {
-            *lookahead = *copy;
-            break;
-        }
-*/
-        //if the token is not a binary operator break
         if(!parse_binary_op(lookahead, operators, operands))
         {
             *lookahead = *copy;
@@ -65,10 +57,15 @@ int parse_factor(char **pos, stack *operators, stack *operands)
     if(tok)
     {
         if(!strcmp(tok->token, "INT"))
-            goto pass;
+         {
+             push(operands, init_element(tok->attribute));
+             goto pass;
+         }
 
+        //XXX Didnt implement this yet still thinking
         if(!strcmp(tok->token, "("))
         {
+            //push(operators, tok->token);
             if(!parse_expression(lookahead, operators, operands))
                 return 0;
 
@@ -88,19 +85,44 @@ pass:
 
 int parse_binary_op(char **pos, stack *operators, stack *operands)
 {
-    char **lookahead = malloc(sizeof(char *));
+    char **lookahead = malloc(sizeof(char *)), *top;
     *lookahead = *pos;
     token *tok;
+    int v1, v2;
 
     tok = scan(lookahead);
     if(tok &&
             (!strcmp(tok->token, "+") ||
-             !strcmp(tok->token, "-") ||
-             !strcmp(tok->token, "*") ||
-             !strcmp(tok->token, "/")))
+             !strcmp(tok->token, "-")))
     {
+        top = peek(operators)->data;
+        while(!strcmp(top, "*") || !strcmp(top, "/"))
+        {
+            pop(operators);
+            v2 = atoi(pop(operands)->data);
+            v1 = atoi(pop(operands)->data);
+            !strcmp(top, "*") ?
+                push(operands, init_element(itoa(v1*v2))) :
+                push(operands, init_element(itoa(v1/v2)));
+            top = peek(operators)->data;
+        }
         *pos = *lookahead;
         return 1;
+    }
+
+    if(tok &&
+            !strcmp(tok->token, "*") ||
+            !strcmp(tok->token, "/"))
+    {
+        top = peek(operators)->data;
+        v2 = atoi(pop(operands)->data);
+        v1 = atoi(pop(operands)->data);
+        !strcmp(top, "*") ?
+            push(operands, init_element(itoa(v1*v2))) :
+            push(operands, init_element(itoa(v1/v2)));
+        *pos = *lookahead;
+        return 1;
+
     }
 
     return 0;
