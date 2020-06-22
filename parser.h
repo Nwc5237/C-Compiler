@@ -28,10 +28,10 @@ int parse_binary_op(char **pos, stack *operators, stack *operands);
 
 #ifndef PARSE_UNARY_OP_H_
 #define PARSE_UNARY_OP_H_
-int parse_unary_op(char **pos, stack *operators, stack *operands);
+int parse_unary_op(char **pos, stack *operators, stack *operands, char *prefix);
 #endif // PARSE_UNARY_OP_H_
 
-#ifndef PARSE_EOF_H_
-#define PARSE_EOF_H_
-int parse_EOF(char **pos, stack *operators, stack *operands);
-#endif // PARSE_EOF_H_
+#ifndef PARSE_EXPRESSION_END_H_
+#define PARSE_EXPRESSION_END_H_
+int parse_expression_end(char **pos, stack *operators, stack *operands);
+#endif // PARSE_EXPRESSION_END_H_

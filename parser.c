@@ -9,6 +9,7 @@
 int parse(char **pos)
 {
     stack *operators=malloc(sizeof(stack)), *operands=malloc(sizeof(stack));
+    push(operators, init_element("sentinel"));
     parse_expression(pos, operators, operands);
     printf("result: %s\n", pop(operands)->data);
     return 1;
@@ -42,7 +43,7 @@ int parse_expression(char **pos, stack *operators, stack *operands)
         }
     }
     
-    if(!parse_EOF(lookahead, operators, operands))
+    if(!parse_expression_end(lookahead, operators, operands))
     {
         *lookahead = *copy;
         printf("Error before parsing EOF while parsing expressions\n");
@@ -65,20 +66,28 @@ int parse_factor(char **pos, stack *operators, stack *operands)
     if(tok)
     {
         if(!strcmp(tok->token, "INT"))
-         {
+        {
              push(operands, init_element(tok->attribute));
              goto pass;
-         }
+        }
 
-        //XXX Didnt implement this yet still thinking
         if(!strcmp(tok->token, "("))
         {
-            //push(operators, tok->token);
+            push(operators, init_element("sentinel"));
             if(!parse_expression(lookahead, operators, operands))
                 return 0;
 
             tok = scan(lookahead);
             if(tok && !strcmp(tok->token, ")"))
+            {
+                pop(operators);
+                goto pass;
+            }
+        }
+
+        if(!strcmp(tok->token, "-") || !strcmp(tok->token, "+"))
+        {
+            if(parse_unary_op(lookahead, operators, operands, tok->token))
                 goto pass;
         }
     }
@@ -91,9 +100,7 @@ pass:
     return 1;
 }
 
-//XXX wtihout parentheses:
-//if we see a + or - always pop off the previous op (if there is one)
-//and perform it. 
+//XXX without parentheses:
 int parse_binary_op(char **pos, stack *operators, stack *operands)
 {
     char **lookahead = malloc(sizeof(char *));
@@ -111,7 +118,7 @@ int parse_binary_op(char **pos, stack *operators, stack *operands)
  
         //when theres no other operator we need to wait for another operand
         //so we just push the current operator
-        if(!top)
+        if(!strcmp(top->data, "sentinel"))
         {
             push(operators, init_element(tok->token));
             *pos = *lookahead;
@@ -158,7 +165,7 @@ int parse_binary_op(char **pos, stack *operators, stack *operands)
     {
         top = peek(operators);
 
-        if(!top)
+        if(!strcmp(top->data, "sentinel"))//!top)
         {
             push(operators, init_element(tok->token));
             *pos = *lookahead;
@@ -189,24 +196,39 @@ int parse_binary_op(char **pos, stack *operators, stack *operands)
 
 }
 
-int parse_unary_op(char **pos, stack *operators, stack *operands)
+int parse_unary_op(char **pos, stack *operators, stack *operands, char *prefix)
 {
     char **lookahead = malloc(sizeof(char *));
     *lookahead = *pos;
     token *tok;
+    element *top;
 
     tok = scan(lookahead);
-    if(tok && !strcmp(tok->token, "-"))
+    if(tok && !strcmp(tok->token, "INT"))
     {
-        *pos = *lookahead;
-        return 1;
+        top = peek(operators);
+        if(top &&
+                (!strcmp(top->data, "*") ||
+                 !strcmp(top->data, "/") ||
+                 !strcmp(top->data, "sentinel")))
+        {
+            if(!strcmp(prefix, "-"))
+                push(operands, init_element(itoa(-atoi(tok->attribute))));
+            else
+                push(operands, init_element(tok->attribute));
+            
+            *pos = *lookahead;
+            return 1;
+        }
     }
+
+    //here could parse expressions like -(factor)
 
     return 0;
 }
 
-//use this instead of the binary op to finish parsing expressions
-int parse_EOF(char **pos, stack *operators, stack *operands)
+
+int parse_expression_end(char **pos, stack *operators, stack *operands)
 {
     int v1, v2;
     token *tok;
@@ -214,44 +236,39 @@ int parse_EOF(char **pos, stack *operators, stack *operands)
 
     *lookahead = *pos;
 
-    tok = scan(lookahead);
-    if(tok && !strcmp(tok->token, "$"))
+    //While we haven't popped to the sentinel
+    while(strcmp(peek(operators)->data, "sentinel"))//!is_empty(operators))
     {
-        while(1)
+        v2 = atoi(pop(operands)->data);
+        v1 = atoi(pop(operands)->data);
+
+        char op = *pop(operators)->data;
+        switch(op)
         {
-            v2 = atoi(pop(operands)->data);
-            v1 = atoi(pop(operands)->data);
+            case '+':
+                push(operands, init_element(itoa(v1+v2)));
+                *pos = *lookahead;
+                break;
 
-            char op = *pop(operators)->data;
-            switch(op)
-            {
-                case '+':
-                    push(operands, init_element(itoa(v1+v2)));
-                    *pos = *lookahead;
-                    break;
-
-                case '-':
-                    push(operands, init_element(itoa(v1-v2)));
-                    *pos = *lookahead;
-                    break;
-
-                case '*':
-                    push(operands, init_element(itoa(v1*v2)));
-                    *pos = *lookahead;
-                    break;
+            case '-':
+                push(operands, init_element(itoa(v1-v2)));
+                *pos = *lookahead;
+                break;
             
-                case '/':
-                    push(operands, init_element(itoa(v1/v2)));
-                    *pos = *lookahead;
-                    break;
+            case '*':
+                push(operands, init_element(itoa(v1*v2)));
+                *pos = *lookahead;
+                break;
             
-                default:
-                    printf("Error in parse EOF\n");
-                    exit(0);
-
-            }
-            if(!peek(operators))
-                return 1;
+            case '/':
+                push(operands, init_element(itoa(v1/v2)));
+                *pos = *lookahead;
+                break;
+            
+            default:
+                printf("Error in parse EOF\n");
+                exit(0);
         }
     }
+    return 1;
 }

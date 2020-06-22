@@ -63,13 +63,8 @@ stack *init_stack()
 //utility function for converting ints to ascii strings
 char *itoa(int a)
 {
-    if(a < 0)
-    {
-        printf("Error: converting negative constant.\n");
-        exit(0);
-    }
 
-    int log10=0, copy=a;
+    int log10=0, copy=a>0?a:-a;
     char *str;
 
     if(!a)
@@ -81,15 +76,31 @@ char *itoa(int a)
         log10++;
     }
 
+    log10 = a > 0 ? log10 : log10 + 1;
     str = malloc(sizeof(char) * log10);
     str[log10] = '\0';
     log10--;
 
-    while(log10 >= 0)
+    if(a>0)
     {
-        str[log10] = (char) (a%10+48);
-        a /= 10;
-        log10--;
+        while(log10 >= 0)
+        {
+            str[log10] = (char) (a%10+48);
+            a /= 10;
+            log10--;
+        }
     }
+    else
+    {
+        a = -a;
+        while(log10 >= 1)
+        {
+            str[log10] = (char) (a%10+48);
+            a /= 10;
+            log10--;
+        }
+        str[log10] = '-';
+    }
+
     return str;
 }
