@@ -390,6 +390,13 @@ token *scan(char **pos)
         case '%':
            return  accept_operator(pos);
 
+        //EOF token
+        case '$':
+           token_found = (token *) malloc(sizeof(token));
+           token_found->token = strndup(*pos, 1);
+           (*pos)++;
+           return token_found;
+
         default:
             return NULL;
     }

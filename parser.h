@@ -31,3 +31,7 @@ int parse_binary_op(char **pos, stack *operators, stack *operands);
 int parse_unary_op(char **pos, stack *operators, stack *operands);
 #endif // PARSE_UNARY_OP_H_
 
+#ifndef PARSE_EOF_H_
+#define PARSE_EOF_H_
+int parse_EOF(char **pos, stack *operators, stack *operands);
+#endif // PARSE_EOF_H_
