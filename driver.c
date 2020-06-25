@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "utilities.h"
 #include "lexer.h"
 #include "parser.h"
 
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
         printf("%c", *i);
         i++;
     }
-    printf("\nDone.\n");
+    printf("\n");
+
     exit(0);
 }

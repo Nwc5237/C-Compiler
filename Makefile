@@ -1,2 +1,2 @@
-compiler: driver.c parser.c lexer.c data_structures.c
-	gcc -o compiler lexer.c parser.c driver.c data_structures.c -ggdb
+compiler: driver.c parser.c lexer.c utilities.c
+	gcc -o compiler lexer.c parser.c driver.c utilities.c -ggdb
