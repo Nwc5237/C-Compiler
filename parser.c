@@ -117,7 +117,7 @@ int parse_expression(char **pos, symbol_table_t *symbol_table, stack *operators,
 
 
 /*
- * factor -> int | (expr) | unary_op factor
+ * factor -> int | (expr) | var | unary_op factor
  */
 int parse_factor(char **pos, symbol_table_t *symbol_table, stack *operators, stack *operands)
 {
@@ -153,8 +153,12 @@ int parse_factor(char **pos, symbol_table_t *symbol_table, stack *operators, sta
 
         if(!strcmp(tok->token, "-") || !strcmp(tok->token, "+"))
         {
-            if(parse_unary_op(lookahead, symbol_table, operators, operands, tok->token))
-                goto pass;
+            *lookahead = *pos;
+            if(parse_unary_op(lookahead, symbol_table, operators, operands))
+            {
+                if(parse_factor(lookahead, symbol_table, operators, operands))
+                    goto pass;
+            }
         }
 
         if(!strcmp(tok->token, "ID"))
@@ -198,7 +202,19 @@ int parse_binary_op(char **pos, symbol_table_t *symbol_table, stack *operators, 
              !strcmp(tok->token, "-")))
     {    
         top = peek(operators);
- 
+        
+        if(top && !strcmp(top->data, "positive") ||
+                !strcmp(top->data, "negative"))
+        {
+            pop(operators);
+            if(!strcmp(top->data, "negative"))
+            {
+                push(operands, init_element(itoa(-atoi(pop(operands)->data))));
+                *pos = *lookahead;
+                return 1;
+            }
+        }
+
         //push current operator while waiting for next operand to evaluate
         if(!strcmp(top->data, "sentinel"))
         {
@@ -247,6 +263,18 @@ int parse_binary_op(char **pos, symbol_table_t *symbol_table, stack *operators, 
     {
         top = peek(operators);
 
+        if(top && !strcmp(top->data, "positive") ||
+                !strcmp(top->data, "negative"))
+        {
+            pop(operators);
+            if(!strcmp(top->data, "negative"))
+            {
+                push(operands, init_element(itoa(-atoi(pop(operands)->data))));
+                *pos = *lookahead;
+                return 1;
+            }
+        }
+
         if(!strcmp(top->data, "sentinel"))
         {
             push(operators, init_element(tok->token));
@@ -281,7 +309,7 @@ int parse_binary_op(char **pos, symbol_table_t *symbol_table, stack *operators, 
 /*
  * unary_op -> + | -
  */
-int parse_unary_op(char **pos, symbol_table_t *symbol_table, stack *operators, stack *operands, char *prefix)
+int parse_unary_op(char **pos, symbol_table_t *symbol_table, stack *operators, stack *operands)
 {
     char **lookahead = malloc(sizeof(char *));
     *lookahead = *pos;
@@ -289,22 +317,18 @@ int parse_unary_op(char **pos, symbol_table_t *symbol_table, stack *operators, s
     element *top;
 
     tok = scan(lookahead);
-    if(tok && !strcmp(tok->token, "INT"))
+    top = peek(operators);
+    if(top &&
+            (!strcmp(top->data, "*") ||
+             !strcmp(top->data, "/") ||
+             !strcmp(top->data, "sentinel")))
     {
-        top = peek(operators);
-        if(top &&
-                (!strcmp(top->data, "*") ||
-                 !strcmp(top->data, "/") ||
-                 !strcmp(top->data, "sentinel")))
-        {
-            if(!strcmp(prefix, "-"))
-                push(operands, init_element(itoa(-atoi(tok->attribute))));
-            else
-                push(operands, init_element(tok->attribute));
-            
-            *pos = *lookahead;
-            return 1;
-        }
+        !strcmp(tok->token, "+") ?
+            push(operators, init_element("positive")) :
+            push(operators, init_element("negative"));
+        
+        *pos = *lookahead;
+        return 1;
     }
 
     return 0;
@@ -322,6 +346,14 @@ int parse_expression_end(char **pos, stack *operators, stack *operands)
     char **lookahead = malloc(sizeof(char *));
 
     *lookahead = *pos;
+
+    while(!strcmp(peek(operators)->data, "positive") ||
+            !strcmp(peek(operators)->data, "negative"))
+    {
+        if(!strcmp(peek(operators)->data, "negative"))
+            push(operands, init_element(itoa(-atoi(pop(operands)->data))));
+        pop(operators);
+    }
 
     while(strcmp(peek(operators)->data, "sentinel"))
     {

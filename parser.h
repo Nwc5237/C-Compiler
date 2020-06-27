@@ -28,7 +28,7 @@ int parse_binary_op(char **pos, symbol_table_t *symbol_table, stack *operators, 
 
 #ifndef PARSE_UNARY_OP_H_
 #define PARSE_UNARY_OP_H_
-int parse_unary_op(char **pos, symbol_table_t *symbol_table, stack *operators, stack *operands, char *prefix);
+int parse_unary_op(char **pos, symbol_table_t *symbol_table, stack *operators, stack *operands);
 #endif // PARSE_UNARY_OP_H_
 
 #ifndef PARSE_EXPRESSION_END_H_
