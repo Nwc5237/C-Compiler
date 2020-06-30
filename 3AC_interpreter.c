@@ -58,6 +58,19 @@ token_t *lex(char **pos)
         }
     }
 
+    //integers
+    if(in(*forward, digits))
+    {
+        forward++;
+        while(in(*forward, digits))
+            forward++;
+
+        token->token = strdup("INT");
+        token->attribute = strndup(lexeme_begin, (size_t)(forward-lexeme_begin));
+        *pos = forward;
+        return token;
+    }
+
     //labels and operations
     *forward = *lexeme_begin;
     if(in(*forward, letters))
@@ -102,8 +115,8 @@ reg_t *get_reg(reg_t *reg_file, token_t *search)
     }
     
     cur = malloc(sizeof(token_t));
-    cur->name = search->attribute;
-    cur->val = 0;
+    cur->name = strdup(search->attribute);
+    cur->val = strdup("0");
     prev->next = cur;
     return cur;
 }
@@ -161,6 +174,7 @@ int parse_statement(char **pos, reg_t *reg_file)
     reg_t *reg;
     char *lookahead = *pos;
 
+    //print statements
     print = lex(&lookahead);
     if(print && !strcmp(print->attribute, "print"))
     {
@@ -171,7 +185,7 @@ int parse_statement(char **pos, reg_t *reg_file)
             if(eos && !strcmp(eos->token, "EOS"))
             {
                 reg = get_reg(reg_file, source1);
-                printf("%s=%d\n", reg->name, reg->val);
+                printf("%s=%s\n", reg->name, reg->val);
                 *pos = lookahead;
                 return 1;
             }
@@ -179,6 +193,10 @@ int parse_statement(char **pos, reg_t *reg_file)
         printf("Error in print statement");
     }
 
+    /*
+     * statements of the form: destination := op source1 source2;
+     * and destination := source1;
+     */
     lookahead = *pos;
     destination = lex(&lookahead);
     if(destination && !strcmp(destination->token, "register"))
@@ -199,6 +217,7 @@ int parse_statement(char **pos, reg_t *reg_file)
                         //EOS (end of statement) aka ";"
                         if(eos && !strcmp(eos->token, "EOS"))
                         {
+                            //XXX In here we need to modify the reg file if it;s NULL
                             execute_op(reg_file, destination, op, source1, source2);
                             *pos = lookahead;
                             return 1;
@@ -212,8 +231,10 @@ int parse_statement(char **pos, reg_t *reg_file)
                 eos = lex(&lookahead);
                 if(eos && !strcmp(eos->token, "EOS"))
                 {
-                    reg = get_reg(reg_file, source1);
-                    reg->val = source1->attribute;
+                    reg = get_reg(reg_file, destination);
+                    reg->val = strdup(source1->attribute);
+                    *pos = lookahead;
+                    return 1;
                 }
             }
         }
@@ -227,7 +248,10 @@ int main(int argc, char *argv[])
     char *code = argv[1];
     char *pos = code;
     token_t *tok;
-    reg_t *reg_file = NULL;
+    reg_t *reg_file;
+    reg_file = malloc(sizeof(reg_t));
+    reg_file->name = strdup("empty_reg");
+    reg_file->val = strdup("empty_val");
 
     // statements of form reg := op a b;
     while(parse_statement(&pos, reg_file))
