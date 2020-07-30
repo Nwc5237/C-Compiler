@@ -40,7 +40,7 @@ class Parser:                                                     #can manually 
             tok = self.lexer.scan()
             if tok.token == "semicolon":
                 print("Successfully parsed: {}".format(self.lexer.code[:self.lexer.pos]))
-                self.shunting_yard(0, self.lexer.pos)
+                print(self.operands, self.operators)
                 return
         print("Failure")
         print(self.operands, self.operators)
@@ -70,10 +70,12 @@ class Parser:                                                     #can manually 
         if tok.token == "ID":
             return 1
 
-        if tok.att == "(":             #XXX supposed to push the sentinel value onto the stack of operators here
+        if tok.att == "(":
+            self.operators.push(Lex.Token('sentinel', 'sentinel'))
             if self.parse_expr():
                 tok = self.lexer.scan()
                 if tok.att == ")":
+                    self.operators.pop()
                     return 1
 
         #reset position in text file on failure
@@ -121,7 +123,7 @@ class Parser:                                                     #can manually 
             self.operators.push(tok)
             return 1
 
-        if tok.att == 'mult_op':
+        if tok.token == 'mult_op':
             top = self.operators.peek()
             if top.att == 'sentinel':
                 self.operators.push(tok)
